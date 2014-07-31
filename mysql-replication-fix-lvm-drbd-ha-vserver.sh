@@ -1,10 +1,12 @@
-MySQL Replikation wieder aufsetzen mit VServer/DRBD/LVM.
-Plan: MySQL-VServer MASTER laeuft auf SEITEA, MySQL-VServer SLAVE laeuft auf SEITEB.
-/var/lib/mysql ist $SIZE gross. Volumegroups heissen $VGSEITEA und $VGSEITEB.
-DRBDIPA und DRBDIPA sind die IPs der Direktverbindung zwischen $SEITEA und $SEITEB.
-Der Snapshot ist SIZESNAP gross.
+#MySQL Replikation wieder aufsetzen mit VServer/DRBD/LVM.
+#Plan: MySQL-VServer MASTER laeuft auf SEITEA, MySQL-VServer SLAVE laeuft auf SEITEB.
+#/var/lib/mysql ist $SIZE gross. Volumegroups heissen $VGSEITEA und $VGSEITEB.
+#DRBDIPA und DRBDIPA sind die IPs der Direktverbindung zwischen $SEITEA und $SEITEB.
+#Der Snapshot ist SIZESNAP gross.
+#
+echo Versuch mit Parametrisierung, nicht als Skript geeignet.
+exit 1
 
-Versuch mit Parametrisierung, nicht als Skript geeignet.
 SEITEA=m01host01a
 SEITEB=m01host01b
 TMPLV=tempmysqlsync
@@ -50,6 +52,7 @@ SIZESNAP=4G
 MASTER=m01mysql01
 SLAVE=m01mysql02
 REPLINFO=/root/master-replication-info
+
 # auf $SEITEA, 1 shell sparen. $SEITEB damit der Snapshot schnell wieder aufgeloest werden kann als Puffer
 (cd /etc/vservers/$MASTER/vdir/var/lib/mysql && tar cf - . | nc -l -p 5679 ) &
 ssh $SEITEB "(
@@ -58,7 +61,6 @@ mkfs.ext4 /dev/$TMPVG/$TMPLV
 mkdir -p /mnt/tempmysqlsync
 mkdir -p /mnt/tempmysqlsnap
 mount /dev/$TMPVG/$TMPLV /mnt/tempmysqlsync
-(cd /mnt/tempmysqlsync && nc $DRBDIPA 5679 | mbuffer -m 8G | tar xvpf - )
 )"
 
 MOUNTPOINT=$(df /etc/vservers/$MASTER/vdir/var/lib/mysql | sed '1d; s/.* //')
@@ -86,7 +88,7 @@ vserver $MASTER exec bash -c "(echo > /tmp/replicationpipe; rm /tmp/replicationp
 
 ssh $SEITEB "(
 mount /dev/$VGSEITEB/tempmysqlsnap /mnt/tempmysqlsnap &&
-rsync -rlHpogDtSvx -c --stats --progress --numeric-ids --delete /mnt/tempmysqlsnap/$RELPATH/. /mnt/tempmysqlsync/ &&
+( cd /mnt/tempmysqlsnap/$RELPATH/ && tar cf - . ) | mbuffer -m 8G | ( cd /mnt/tempmysqlsync && tar xvpf - ) &&
 umount /mnt/tempmysqlsnap &&
 lvremove -f /dev/$VGSEITEB/tempmysqlsnap
 )"
