@@ -25,6 +25,7 @@ print_help() {
 	echo "--lv:  name of logical volume containing volume with drbd secondary containing the master mysql servers /var/lib/mysql, no default" >&2
 	echo "--size:  Size of a temporary volume holding the whole of /var/lib/mysql, defaults to size of lv holding /var/lib/mysql" >&2
 	echo "--sizesnap:  Size of snapshotvolume, defaults to size of lv holding /var/lib/mysql" >&2
+	echo "--fs:  fstype of /var/lib/mysql, no default, no error checking" >&2
 	echo "--master:  Name of VServer holding the MySQL master" >&2
 	echo "--slave:  Name of VServer holding the MySQL slave" >&2
 }
@@ -34,7 +35,7 @@ error() {
   exit 1
 }
 
-TEMP=`getopt -o h --long help,seiteb:,tmplv:,tmpvg:,vgseiteb:,lv:,size:,sizesnap:,master:,slave:,replinfo: -- "$@"`
+TEMP=`getopt -o h --long help,seiteb:,tmplv:,tmpvg:,vgseiteb:,lv:,size:,sizesnap:,master:,slave:,fs:,replinfo: -- "$@"`
 if [ $? != 0 ] ; then print_help >&2 ; exit 1 ; fi
 eval set -- "$TEMP"
 while true ; do
@@ -48,6 +49,7 @@ while true ; do
 		--sizesnap) SIZESNAP=$2; shift 2;;
 		--master) MASTER=$2; shift 2;;
 		--slave) SLAVE=$2; shift 2;;
+		--fs) FS=$2; shift 2;;
 		--replinfo) REPLINFO=$2; shift 2;;
 		--help|-h) print_help;;
 		--) shift ; break ;;
@@ -61,6 +63,9 @@ if ! which fsfreeze >/dev/null 2>&1; then
 fi
 if ! which mbuffer >/dev/null 2>&1; then
 	error "Install mbuffer"
+fi
+if [ x$FS == x ]; then
+	error "Missing parameter --fs"
 fi
 if [ x$SEITEB == x ]; then
 	error "Missing parameter --seiteb"
@@ -175,7 +180,7 @@ echo fsunfreeze done
 vserver $MASTER exec bash -c "(echo > /tmp/replicationpipe; rm /tmp/replicationpipe)"
 
 ssh -X -a $SEITEB "(
-mount /dev/$VGSEITEB/tempmysqlsnap /mnt/tempmysqlsnap &&
+mount -t $FS /dev/$VGSEITEB/tempmysqlsnap /mnt/tempmysqlsnap &&
 ( cd /mnt/tempmysqlsnap/$RELPATH/ && tar cf - . ) | mbuffer -m 8G | ( cd /mnt/tempmysqlsync && tar xvpf - ) &&
 umount /mnt/tempmysqlsnap &&
 lvremove -f /dev/$VGSEITEB/tempmysqlsnap
