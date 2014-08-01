@@ -138,7 +138,7 @@ fi
 
 # auf $SEITEA, 1 shell sparen. $SEITEB damit der Snapshot schnell wieder aufgeloest werden kann als Puffer
 ssh -X -a $SEITEB "(
-lvcreate -L$SIZE -n tempmysqlsync $TMPVG
+lvcreate -L$SIZE -n $TMPLV $TMPVG
 mkfs.ext4 /dev/$TMPVG/$TMPLV
 mkdir -p /mnt/tempmysqlsync
 mkdir -p /mnt/tempmysqlsnap
