@@ -56,8 +56,11 @@ while true ; do
 done
 
 echo "Checking parameters..."
-if ! which fsfreeze; then
+if ! which fsfreeze >/dev/null 2>&1; then
 	error "Install fsfreeze / util-linux version wheezy and up"
+fi
+if ! which mbuffer >/dev/null 2>&1; then
+	error "Install mbuffer"
 fi
 if [ x$SEITEB == x ]; then
 	error "Missing parameter --seiteb"
