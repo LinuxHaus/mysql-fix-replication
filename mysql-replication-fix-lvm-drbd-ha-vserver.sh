@@ -56,6 +56,9 @@ while true ; do
 done
 
 echo "Checking parameters..."
+if ! which fsfreeze; then
+	error "Install fsfreeze / util-linux version wheezy and up"
+fi
 if [ x$SEITEB == x ]; then
 	error "Missing parameter --seiteb"
 else
