@@ -1,3 +1,4 @@
+#MySQL Replikation wieder aufsetzen mit VServer/DRBD/LVM.
 #  Plan: MySQL-VServer MASTER laeuft auf SEITEA, MySQL-VServer SLAVE laeuft auf SEITEB.
 #  /var/lib/mysql ist $SIZE gross. Volumegroups heissen $VGSEITEA und $VGSEITEB.
 #  DRBDIPA und DRBDIPA sind die IPs der Direktverbindung zwischen $SEITEA und $SEITEB.
@@ -147,7 +148,6 @@ if [ "x$GO" != "xYes, I understand this might destroy all my data" ]; then
   echo aborted
   exit 1
 fi
-#exit 1
 
 # auf $SEITEA, 1 shell sparen. $SEITEB damit der Snapshot schnell wieder aufgeloest werden kann als Puffer
 ssh -X -a $SEITEB "(
