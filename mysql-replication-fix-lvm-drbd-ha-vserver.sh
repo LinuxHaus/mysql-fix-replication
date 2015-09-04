@@ -121,7 +121,7 @@ fi
 if [ x$LV == x ]; then
 	error "Missing parameter --lv"
 fi
-if [ x$DRBD == x1]; then
+if [ x$DRBD == x1 ]; then
 	if ! ssh -X -a $SEITEB ls /dev/$VGSEITEB/$LV >/dev/null 2>&1; then
 		error "$SEITEB: /dev/$VGSEITEB/$LV doesn't exist, parameters --vgseiteb and --lv"
 	fi
@@ -131,7 +131,7 @@ else
 	fi
 fi
 if [ x$SIZE == x ]; then
-	if [ x$DRBD == x1]; then
+	if [ x$DRBD == x1 ]; then
 		SIZE=$(ssh -X -a $SEITEB lvs --units s | awk '$2 ~ /^'$VGSEITEB'$/ && $1 ~ /^'$LV'$/ {print $4}')
 	else
 		SIZE=$(lvs --units s | awk '$2 ~ /^'$VGSEITEA'$/ && $1 ~ /^'$LV'$/ {print $4}')
