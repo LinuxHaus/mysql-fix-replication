@@ -27,7 +27,8 @@ print_help() {
 	echo "--seiteb: hostname/ip of other cluster host, defaults to 'otherside', make sure passwordless login works with ssh" >&2
 	echo "--tmplv:  name of temporary logical volume on $SEITEB, defaults to 'temp'" >&2
 	echo "--tmpvg:  name of volumegroup for temporary logical volume on $SEITEB, defaults to 'vg_$SEITEB'" >&2
-	echo "--vgseiteb:  name of volumegroup containing the logical volume with drbd secondary containing the master mysql servers /var/lib/mysql, defaults to 'vg_$SEITEB'" >&2
+	echo "--vgseitea: volume group to use on seitea" >&2
+	echo "--vgseiteb: name of volumegroup containing the logical volume with drbd secondary containing the master mysql servers /var/lib/mysql, defaults to 'vg_$SEITEB'" >&2
 	echo "--lv:  name of logical volume containing volume with drbd secondary containing the master mysql servers /var/lib/mysql, no default" >&2
 	echo "--size:  Size of a temporary volume holding the whole of /var/lib/mysql, defaults to size of lv holding /var/lib/mysql" >&2
 	echo "--sizesnap:  Size of snapshotvolume, defaults to size of lv holding /var/lib/mysql" >&2
@@ -41,7 +42,7 @@ error() {
   exit 1
 }
 
-TEMP=`getopt -o h --long help,nodrbd,seiteb:,notmplv,tmplv:,tmpvg:,vgseiteb:,lv:,size:,sizesnap:,master:,slave:,fs:,replinfo: -- "$@"`
+TEMP=`getopt -o h --long help,nodrbd,seiteb:,notmplv,tmplv:,tmpvg:,vgseitea:,vgseiteb:,lv:,size:,sizesnap:,master:,slave:,fs:,replinfo: -- "$@"`
 if [ $? != 0 ] ; then print_help >&2 ; exit 1 ; fi
 eval set -- "$TEMP"
 while true ; do
@@ -51,6 +52,7 @@ while true ; do
 		--notmplv) NOTMPLV=0; shift 2;;
 		--tmplv) TMPLV=$2; shift 2;;
 		--tmpvg) TMPVG=$2; shift 2;;
+		--vgseitea) VGSEITEA=$2; shift 2;;
 		--vgseiteb) VGSEITEB=$2; shift 2;;
 		--lv) LV=$2; shift 2;;
 		--size) SIZE=$2; shift 2;;
@@ -89,12 +91,24 @@ if [ x$NOTMPLV == x0 ] && [ x$TMPLV == x ]; then
 	error "Missing parameter --tmplv and not using --notmplv"
 else
 	if [ x$TMPVG == x ]; then
-		TMPVG=vg_$SEITEB
+		if [ x$DRBD == x1 ]; then
+			TMPVG=vg_$SEITEB
+		else
+			TMPVG=$VGSEITEA
+		fi
 	fi
-	if ssh -X -a $SEITEB ls /dev/$TMPVG/$TMPLV >/dev/null 2>&1; then
-		error "$SEITEB: /dev/$TMPVG/$TMPLV already exists, parameter --tmplv"
-	elif ! ssh -X -a $SEITEB vgdisplay $TMPVG >/dev/null 2>&1; then
-		error "$SEITEB: VG $TMPVG doesn't exist, parameter --tmpvg"
+	if [ x$DRBD == x1 ]; then
+		if ssh -X -a $SEITEB ls /dev/$TMPVG/$TMPLV >/dev/null 2>&1; then
+			error "$SEITEB: /dev/$TMPVG/$TMPLV already exists, parameter --tmplv"
+		elif ! ssh -X -a $SEITEB vgdisplay $TMPVG >/dev/null 2>&1; then
+			error "$SEITEB: VG $TMPVG doesn't exist, parameter --tmpvg"
+		fi
+	else
+		if ls /dev/$TMPVG/$TMPLV >/dev/null 2>&1; then
+			error "$HOSTNAME: /dev/$TMPVG/$TMPLV already exists, parameter --tmplv"
+		elif ! vgdisplay $TMPVG >/dev/null 2>&1; then
+			error "$HOSTNAME: VG $TMPVG doesn't exist, parameter --tmpvg"
+		fi
 	fi
 fi
 if [ x$VGSEITEB == x ]; then
