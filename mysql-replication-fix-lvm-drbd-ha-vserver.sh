@@ -41,7 +41,7 @@ error() {
   exit 1
 }
 
-TEMP=`getopt -o h --long help,nodrbd,seiteb:,tmplv:,tmpvg:,vgseiteb:,lv:,size:,sizesnap:,master:,slave:,fs:,replinfo: -- "$@"`
+TEMP=`getopt -o h --long help,nodrbd,seiteb:,notmplv,tmplv:,tmpvg:,vgseiteb:,lv:,size:,sizesnap:,master:,slave:,fs:,replinfo: -- "$@"`
 if [ $? != 0 ] ; then print_help >&2 ; exit 1 ; fi
 eval set -- "$TEMP"
 while true ; do
