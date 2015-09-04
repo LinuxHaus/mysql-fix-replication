@@ -121,14 +121,24 @@ fi
 if [ x$LV == x ]; then
 	error "Missing parameter --lv"
 fi
-if ! ssh -X -a $SEITEB ls /dev/$VGSEITEB/$LV >/dev/null 2>&1; then
-	error "$SEITEB: /dev/$VGSEITEB/$LV doesn't exist, parameters --vgseiteb and --lv"
+if [ x$DRBD == x1]; then
+	if ! ssh -X -a $SEITEB ls /dev/$VGSEITEB/$LV >/dev/null 2>&1; then
+		error "$SEITEB: /dev/$VGSEITEB/$LV doesn't exist, parameters --vgseiteb and --lv"
+	fi
+else
+	if ! ls /dev/$VGSEITEA/$LV >/dev/null 2>&1; then
+		error "$HOSTNAME: /dev/$VGSEITEA/$LV doesn't exist, parameters --vgseitea and --lv"
+	fi
 fi
 if [ x$SIZE == x ]; then
-	SIZE=$(ssh -X -a $SEITEB lvs --units s | awk '$2 ~ /^'$VGSEITEB'$/ && $1 ~ /^'$LV'$/ {print $4}')
+	if [ x$DRBD == x1]; then
+		SIZE=$(ssh -X -a $SEITEB lvs --units s | awk '$2 ~ /^'$VGSEITEB'$/ && $1 ~ /^'$LV'$/ {print $4}')
+	else
+		SIZE=$(lvs --units s | awk '$2 ~ /^'$VGSEITEA'$/ && $1 ~ /^'$LV'$/ {print $4}')
+	fi
 fi
 if [ x$SIZESNAP == x ]; then
-	SIZESNAP=$(ssh -X -a $SEITEB lvs --units s | awk '$2 ~ /^'$VGSEITEB'$/ && $1 ~ /^'$LV'$/ {print $4}')
+	SIZESNAP=$SIZE
 fi
 if [ x$MASTER == x ]; then
 	error "Missing parameter --master"
