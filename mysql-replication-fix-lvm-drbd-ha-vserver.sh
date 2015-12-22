@@ -233,7 +233,7 @@ vserver $MASTER exec bash -c "(echo > /tmp/replicationpipe; rm /tmp/replicationp
 if [ x$DRBD == x1 ]; then
 	ssh -X -a $SEITEB "(
 	  mount -t $FS /dev/$VGSEITEB/tempmysqlsnap /mnt/tempmysqlsnap &&
-	  ( if [ x$NOTMPLV == x0 ]; then
+	  if [ x$NOTMPLV == x0 ]; then
 	      ( cd /mnt/tempmysqlsnap/$RELPATH/ && tar cf - . ) |
 	      mbuffer -m 8G |
 	      ( cd /mnt/tempmysqlsync && tar xvpf - ) &&
