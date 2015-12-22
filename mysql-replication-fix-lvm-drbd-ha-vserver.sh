@@ -1,3 +1,4 @@
+#!/bin/bash
 #MySQL Replikation wieder aufsetzen mit VServer/DRBD/LVM.
 #  Plan: MySQL-VServer MASTER laeuft auf SEITEA, MySQL-VServer SLAVE laeuft auf SEITEB.
 #  /var/lib/mysql ist $SIZE gross. Volumegroups heissen $VGSEITEA und $VGSEITEB.
@@ -260,7 +261,7 @@ ssh -X -a $SEITEB "(
 	rm -rf /etc/vservers/$SLAVE/vdir/var/lib/mysql/*
 )"
 if [ x$NOTMPLV == x0 ]; then
-	ssh -X -a $SEITEB "( ( cd /mnt/tempmysqlsync && tar cf - . ) | mbuffer -m8G | ( cd /etc/vservers/$SLAVE/vdir/var/lib/mysql && tar xvpf - )"
+	ssh -X -a $SEITEB "( ( cd /mnt/tempmysqlsync && tar cf - . ) | mbuffer -m8G | ( cd /etc/vservers/$SLAVE/vdir/var/lib/mysql && tar xvpf - ) )"
 else
   rsync -rlHpogDtvxXA --numeric-ids /mnt/tempmysqlsnap/$RELPATH/. $SEITEB:/etc/vservers/$SLAVE/vdir/var/lib/mysql/
 fi
