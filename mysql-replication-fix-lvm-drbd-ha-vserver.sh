@@ -244,7 +244,7 @@ if [ x$DRBD == x1 ]; then
 else
   mount -t $FS /dev/$VGSEITEA/tempmysqlsnap /mnt/tempmysqlsnap &&
   if [ x$NOTMPLV == x0 ]; then
-	  cd /mnt/tempmysqlsnap/$RELPATH/ && tar cf - . ) |
+	  ( cd /mnt/tempmysqlsnap/$RELPATH/ && tar cf - . ) |
 	  mbuffer -m 8G |
 	  ( cd /mnt/tempmysqlsync && tar xvpf - ) &&
     umount /mnt/tempmysqlsnap &&
