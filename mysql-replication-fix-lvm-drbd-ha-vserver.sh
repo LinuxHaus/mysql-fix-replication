@@ -62,7 +62,7 @@ while true ; do
 		--slave) SLAVE=$2; shift 2;;
 		--fs) FS=$2; shift 2;;
 		--replinfo) REPLINFO=$2; shift 2;;
-		--help|-h) print_help;;
+		--help|-h) print_help; shift 1; exit 0;;
 		--) shift ; break ;;
 		*) echo "Unknown parameter $1i, try -h" ; exit 1 ;;
 	esac
