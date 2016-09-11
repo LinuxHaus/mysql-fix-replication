@@ -48,7 +48,7 @@ if [ $? != 0 ] ; then print_help >&2 ; exit 1 ; fi
 eval set -- "$TEMP"
 while true ; do
 	case "$1" in
-		--nodrbd) DRBD=0; shift 2;;
+		--nodrbd) DRBD=0; shift 1;;
 		--seiteb) SEITEB=$2; shift 2;;
 		--notmplv) NOTMPLV=0; shift 1;;
 		--tmplv) TMPLV=$2; shift 2;;
