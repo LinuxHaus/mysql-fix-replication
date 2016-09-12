@@ -50,7 +50,7 @@ while true ; do
 	case "$1" in
 		--nodrbd) DRBD=0; shift 1;;
 		--seiteb) SEITEB=$2; shift 2;;
-		--notmplv) NOTMPLV=0; shift 1;;
+		--notmplv) NOTMPLV=1; shift 1;;
 		--tmplv) TMPLV=$2; shift 2;;
 		--tmpvg) TMPVG=$2; shift 2;;
 		--vgseitea) VGSEITEA=$2; shift 2;;
