@@ -165,6 +165,7 @@ NOTMPLV=\"$NOTMPLV\"
 TMPLV=\"$TMPLV\"
 TMPVG=\"$TMPVG\"
 DRBD=\"$DRBD\"
+VGSEITEA=\"$VGSEITEA\"
 VGSEITEB=\"$VGSEITEB\"
 LV=\"$LV\"
 SIZE=\"$SIZE\"
@@ -253,7 +254,7 @@ else
 fi
 
 MASTERLOGFILE=$(sed '1d; s/\t.*//' /etc/vservers/$MASTER/vdir$REPLINFO)
-MASTERLOGPOS=$(sed '1d; s/^[^\t]*\t//; s/\t//g' /etc/vservers/$MASTER/vdir$REPLINFO)
+MASTERLOGPOS=$(sed '1d; s/^[^\t]*\t//; s/\t.*//g' /etc/vservers/$MASTER/vdir$REPLINFO)
 
 ssh -X -a $SEITEB "(
 	vserver $SLAVE exec /etc/init.d/mysql stop
