@@ -218,8 +218,10 @@ sync
 echo sync1 done
 sync
 echo sync2 done
-fsfreeze -f $MOUNTPOINT
-echo fsfreeze done
+if [ x$DRBD == x1 ]; then
+  fsfreeze -f $MOUNTPOINT
+  echo fsfreeze done
+fi
 sleep 10
 if [ x$DRBD == x1 ]; then
   ssh -X -a $SEITEB lvcreate -s -L$SIZESNAP -n tempmysqlsnap /dev/$VGSEITEB/$LV
@@ -227,8 +229,10 @@ else
   lvcreate -s -L$SIZESNAP -n tempmysqlsnap /dev/$VGSEITEA/$LV
 fi
 echo snap done
-fsfreeze -u $MOUNTPOINT
-echo fsunfreeze done
+if [ x$DRBD == x1 ]; then
+  fsfreeze -u $MOUNTPOINT
+  echo fsunfreeze done
+fi
 vserver $MASTER exec bash -c "(echo > /tmp/replicationpipe; rm /tmp/replicationpipe)"
 
 if [ x$DRBD == x1 ]; then
