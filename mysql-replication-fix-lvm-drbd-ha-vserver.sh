@@ -272,12 +272,15 @@ else
 fi
 ssh -X -a $SEITEB "(
 	cp -p /etc/vservers/$SLAVE/vdir/root/master.info /etc/vservers/$SLAVE/vdir/var/lib/mysql/
+  rm /etc/vservers/$SLAVE/vdir/var/lib/mysql/auto.cnf
 	vserver $SLAVE exec mysqld_safe --skip-slave-start &
 	while ! echo 'SELECT NOW()' | vserver $SLAVE exec mysql; do sleep 1; done
 	echo \"SHOW SLAVE STATUS; RESET SLAVE; SHOW SLAVE STATUS; CHANGE MASTER TO MASTER_LOG_FILE='$MASTERLOGFILE', MASTER_LOG_POS=$MASTERLOGPOS; SHOW SLAVE STATUS;\" | vserver $SLAVE exec mysql
 	vserver $SLAVE exec /etc/init.d/mysql stop
 )"
-ssh -X -a $SEITEB "(vserver $SLAVE exec /etc/init.d/mysql restart)"
+ssh -X -a $SEITEB "(
+  vserver $SLAVE exec /etc/init.d/mysql restart
+)"
 if [ x$DRBD == x1 ]; then
 	ssh -X -a $SEITEB "(
 		if [ x$NOTMPLV == x1 ]; then
